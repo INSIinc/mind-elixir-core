@@ -1,7 +1,8 @@
-import type { Trigger } from '@viselect/vanilla'
+// import type { Trigger } from '@viselect/vanilla'
 import SelectionArea from '@viselect/vanilla'
 import type { MindElixirInstance, Topic } from '..'
 import dragMoveHelper from '../utils/dragMoveHelper'
+import { Trigger } from '@viselect/vanilla/dist/src/utils/matchesTrigger' //monorepo compatibility
 
 /**
  * 通过此方法为 MindElixirInstance 实例添加鼠标框选功能。
