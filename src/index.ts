@@ -1,3 +1,9 @@
+/**
+ * @fileoverview MindElixir 是一个用于生成和管理思维导图的类库。
+ * @description 该模块提供了思维导图的基础设施、交互功能、数据生成和管理以及相关工具方法。
+ * 使用场景包括：创建、编辑和动态更新思维导图。
+ */
+
 import './index.less'
 import './iconfont/iconfont.js'
 import { LEFT, RIGHT, SIDE, DARK_THEME, THEME } from './const'
@@ -19,6 +25,10 @@ import { version } from '../package.json'
 // TODO show up animation
 const $d = document
 
+/**
+ * @class MindElixir
+ * @classdesc MindElixir 基于 HTML 和 SVG，提供了创建、渲染和交互式编辑思维导图的功能。
+ */
 function MindElixir(
   this: MindElixirInstance,
   {
@@ -54,7 +64,7 @@ function MindElixir(
   ele.className += ' mind-elixir'
   ele.innerHTML = ''
   this.mindElixirBox = ele as HTMLElement
-  this.disposable = []
+  this.disposable = [] // 存储需要销毁的资源。
   this.before = before || {}
   this.locale = locale || 'en'
   this.contextMenuOption = contextMenuOption
@@ -62,69 +72,73 @@ function MindElixir(
   this.toolBar = toolBar === undefined ? true : toolBar
   this.keypress = keypress === undefined ? true : keypress
   this.mouseSelectionButton = mouseSelectionButton || 0
-  // record the direction before enter focus mode, must true in focus mode, reset to null after exit focus
+  // focus 模式下的方向记录。在退出 focus 模式时重置为 null。
   this.direction = typeof direction === 'number' ? direction : 1
   this.draggable = draggable === undefined ? true : draggable
   this.newTopicName = newTopicName || 'new node'
   this.editable = editable === undefined ? true : editable
   this.allowUndo = allowUndo === undefined ? false : allowUndo
-  // this.parentMap = {} // deal with large amount of nodes
-  this.currentNode = null // the selected <tpc/> element
-  this.currentArrow = null // the selected link svg element
-  this.scaleVal = 1
-  this.tempDirection = null
+  // this.parentMap = {} // 处理大量节点时的优化。
+  this.currentNode = null // 表示当前被选中的 <tpc/> 元素
+  this.currentArrow = null // 表示当前被选中的 svg 连接线元素
+  this.scaleVal = 1 // 当前缩放比例。
+  this.tempDirection = null // 暂存的方向值。
   this.generateMainBranch = generateMainBranch || main
   this.generateSubBranch = generateSubBranch || sub
   this.overflowHidden = overflowHidden || false
 
-  this.bus = Bus.create()
+  this.bus = Bus.create() // 初始化发布-订阅事件总线。
 
-  this.container = $d.createElement('div') // map container
+  this.container = $d.createElement('div') // 思维导图的容器。
   this.selectionContainer = selectionContainer || this.container
 
   this.container.className = 'map-container'
 
+  // 根据用户的系统主题自动切换默认主题。
   const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
   this.theme = theme || (mediaQuery.matches ? DARK_THEME : THEME)
 
-  // infrastructure
-  const canvas = $d.createElement('div') // map-canvas Element
+  // 初始化基础结构。
+  const canvas = $d.createElement('div') // 画布元素
   canvas.className = 'map-canvas'
   this.map = canvas
-  this.map.setAttribute('tabindex', '0')
+  this.map.setAttribute('tabindex', '0') // 允许键盘聚焦
   this.container.appendChild(this.map)
   this.mindElixirBox.appendChild(this.container)
 
   this.nodes = $d.createElement('me-nodes')
   this.nodes.className = 'main-node-container'
 
-  this.lines = createLinkSvg('lines') // main link container
-  this.summarySvg = createLinkSvg('summary') // summary container
+  this.lines = createLinkSvg('lines') // 主干连接线容器。
+  this.summarySvg = createLinkSvg('summary') // 汇总图形容器。
 
-  this.linkController = createLinkSvg('linkcontroller') // bezier controller container
-  this.P2 = $d.createElement('div') // bezier P2
-  this.P3 = $d.createElement('div') // bezier P3
+  this.linkController = createLinkSvg('linkcontroller') // 贝塞尔曲线控制器容器。
+  this.P2 = $d.createElement('div') // 贝塞尔曲线控制点 P2。
+  this.P3 = $d.createElement('div') // 贝塞尔曲线控制点 P3。
   this.P2.className = this.P3.className = 'circle'
   this.P2.style.display = this.P3.style.display = 'none'
-  this.line1 = createLine() // bezier auxiliary line1
-  this.line2 = createLine() // bezier auxiliary line2
+  this.line1 = createLine() // 贝塞尔辅助线1
+  this.line2 = createLine() // 贝塞尔辅助线2
   this.linkController.appendChild(this.line1)
   this.linkController.appendChild(this.line2)
-  this.linkSvgGroup = createLinkSvg('topiclinks') // storage user custom link svg
+  this.linkSvgGroup = createLinkSvg('topiclinks') // 用户自定义的连接线存储节点。
 
   this.map.appendChild(this.nodes)
 
   if (this.overflowHidden) {
     this.container.style.overflow = 'hidden'
-  } else initMouseEvent(this)
+  } else initMouseEvent(this) // 初始化鼠标交互事件。
 }
 
+// 将方法属性挂载到原型链。
 MindElixir.prototype = methods
 
+// 静态属性：方向枚举。
 MindElixir.LEFT = LEFT
 MindElixir.RIGHT = RIGHT
 MindElixir.SIDE = SIDE
 
+// 静态属性：主题枚举。
 MindElixir.THEME = THEME
 MindElixir.DARK_THEME = DARK_THEME
 
@@ -138,8 +152,8 @@ MindElixir.version = version
  * @memberof MindElixir
  * @static
  * @name E
- * @param {string} id Node id.
- * @return {TargetElement} Target element.
+ * @param {string} id 节点 ID。
+ * @return {TargetElement} 返回对应的目标元素。
  * @example
  * E('bd4313fbac40284b')
  */
@@ -149,7 +163,8 @@ MindElixir.E = findEle
  * @function new
  * @memberof MindElixir
  * @static
- * @param {String} topic root topic
+ * @param {String} topic 根节点的主题文本。
+ * @return {MindElixirData} 返回包含根节点数据的对象。
  */
 if (import.meta.env.MODE !== 'lite') {
   MindElixir.new = (topic: string): MindElixirData => ({
@@ -161,10 +176,12 @@ if (import.meta.env.MODE !== 'lite') {
   })
 }
 
+// 静态方法：拖拽移动的工具方法。
 MindElixir.dragMoveHelper = dragMoveHelper
 
+// 导出类的接口定义，用作类型检查或外部调用支持。
 export interface MindElixirCtor {
-  new (options: Options): MindElixirInstance
+  new(options: Options): MindElixirInstance
   E: typeof findEle
   new: typeof MindElixir.new
   version: string
@@ -177,4 +194,5 @@ export interface MindElixirCtor {
   dragMoveHelper: typeof dragMoveHelper
 }
 
+// 默认导出类。
 export default MindElixir as unknown as MindElixirCtor

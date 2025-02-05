@@ -62,14 +62,14 @@ const options: Options = {
 
 let mind = new MindElixir(options)
 
-const data = MindElixir.new('new topic')
-mind.init(example)
 
-const m2 = new MindElixir({
-  el: '#map2',
-  selectionContainer: 'body', // use body to make selection usable when transform is not 0
-})
-m2.init(data)
+mind.init(example)
+// const data = MindElixir.new('new topic')
+// const m2 = new MindElixir({
+//   el: '#map2',
+//   selectionContainer: 'body', // use body to make selection usable when transform is not 0
+// })
+// m2.init(data)
 
 function sleep() {
   return new Promise<void>(res => {
