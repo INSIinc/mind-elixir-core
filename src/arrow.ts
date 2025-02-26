@@ -35,11 +35,13 @@ export type Arrow = {
   label: string // 箭头的标签内容
   from: Uid // 箭头起始节点的唯一标识
   to: Uid // 箭头结束节点的唯一标识
-  delta1: { // 起始节点的控制点相对偏移
+  delta1: {
+    // 起始节点的控制点相对偏移
     x: number // x轴方向的偏移量
     y: number // y轴方向的偏移量
   }
-  delta2: { // 结束节点的控制点相对偏移
+  delta2: {
+    // 结束节点的控制点相对偏移
     x: number // x轴方向的偏移量
     y: number // y轴方向的偏移量
   }
@@ -234,7 +236,7 @@ export const createArrow = function (this: MindElixirInstance, from: Topic, to: 
  * 移除指定的箭头链接。
  * @param {CustomSvg} linkSvg - 可选，指向要移除的链接的SVG对象。
  * 如果未传入此参数，则默认使用当前选中的箭头链接。
- * 
+ *
  * 功能详细描述：
  * - 隐藏链接控制器。
  * - 在箭头集 `arrows` 中过滤掉该箭头对象。
@@ -242,7 +244,6 @@ export const createArrow = function (this: MindElixirInstance, from: Topic, to: 
  * - 触发一个箭头移除的操作事件。
  */
 export const removeArrow = function (this: MindElixirInstance, linkSvg?: CustomSvg) {
-
   let link
   if (linkSvg) {
     link = linkSvg
@@ -269,13 +270,12 @@ export const removeArrow = function (this: MindElixirInstance, linkSvg?: CustomS
 /**
  * 选中指定的箭头链接，并显示其控制器。
  * @param {CustomSvg} link - 要选中的箭头链接对象。
- * 
+ *
  * 功能详细描述：
  * - 将指定箭头设置为当前选中状态。
  * - 使用箭头的控制点数据，计算控制器的位置并显示。
  */
 export const selectArrow = function (this: MindElixirInstance, link: CustomSvg) {
-
   this.currentArrow = link
   const obj = link.arrowObj
 
@@ -291,25 +291,23 @@ export const selectArrow = function (this: MindElixirInstance, link: CustomSvg) 
   showLinkController(this, obj, fromData, toData)
 }
 /**
-  * 取消当前箭头的选中状态，并隐藏其控制器。
-  * 
-  * - 将当前选中的箭头设置为 `null`。
-  * - 隐藏链接控制器。
-  */
+ * 取消当前箭头的选中状态，并隐藏其控制器。
+ *
+ * - 将当前选中的箭头设置为 `null`。
+ * - 隐藏链接控制器。
+ */
 export const unselectArrow = function (this: MindElixirInstance) {
-
   this.currentArrow = null
   hideLinkController(this)
 }
 /**
  * 隐藏链接的控制器及其UI元素。
  * @param {MindElixirInstance} mei - MindElixir实例对象。
- * 
+ *
  * 功能详细描述：
  * - 将链接控制器组件及相关点的样式设置为隐藏，从视觉上取消操作点的可见性。
  */
 const hideLinkController = function (mei: MindElixirInstance) {
-
   mei.linkController.style.display = 'none'
   mei.P2.style.display = 'none'
   mei.P3.style.display = 'none'
@@ -320,15 +318,13 @@ const hideLinkController = function (mei: MindElixirInstance) {
  * @param {Arrow} linkItem - 当前选定箭头的对象。
  * @param {DivData} fromData - 起点的控制点数据。
  * @param {DivData} toData - 终点的控制点数据。
- * 
+ *
  * 功能详细描述：
  * - 初始化并显示控制器UI。
  * - 根据控制点的位置调整箭头的曲线路径。
  * - 绑定控制点的拖动事件以实时调整箭头的形状。
  */
 const showLinkController = function (mei: MindElixirInstance, linkItem: Arrow, fromData: DivData, toData: DivData) {
-
-
   mei.linkController.style.display = 'initial'
   mei.P2.style.display = 'initial'
   mei.P3.style.display = 'initial'
@@ -429,13 +425,12 @@ const showLinkController = function (mei: MindElixirInstance, linkItem: Arrow, f
 }
 /**
  * 渲染MindElixir实例中的所有箭头。
- * 
+ *
  * - 清空`linkSvgGroup`内的内容。
  * - 遍历箭头数组，逐一调用 `drawArrow` 方法进行绘制。
  * - 在节点树中追加绘制好的箭头组。
  */
 export function renderArrow(this: MindElixirInstance) {
-
   this.linkSvgGroup.innerHTML = ''
   for (let i = 0; i < this.arrows.length; i++) {
     const link = this.arrows[i]
@@ -477,7 +472,8 @@ export function editArrowLabel(this: MindElixirInstance, el: CustomSvg) {
 
     textEl.innerHTML = node.label // 更新实际 SVG 文本标签内容
     this.linkDiv() // 更新关联的 DOM 缓存
-    this.bus.fire('operation', { // 触发事件通知系统已完成编辑操作
+    this.bus.fire('operation', {
+      // 触发事件通知系统已完成编辑操作
       name: 'finishEditArrowLabel',
       obj: node,
     })
